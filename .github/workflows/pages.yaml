@@ -4,10 +4,9 @@ on:
 
 jobs:
   publish:
-    using: 'composite'
+    runs-on: ubuntu-latest
     steps:
     - name: install and build
-      shell: bash
       run: |
         cd packages/playground
         npm i
