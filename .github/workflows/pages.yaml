@@ -1,6 +1,4 @@
 name: 'Publish'
-description: 'Publish YAML Playground to GitHub Pages'
-author: 'Oliver Dudgeon'
 on:
   push:
 
