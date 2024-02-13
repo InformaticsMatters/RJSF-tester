@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import MonacoEditor from '@monaco-editor/react';
 import { ErrorSchema, RJSFSchema, UiSchema } from '@rjsf/utils';
 import isEqualWith from 'lodash/isEqualWith';
+import YAML from 'yaml';
 
 const monacoEditorOptions = {
   minimap: {
@@ -14,9 +15,10 @@ type EditorProps = {
   title: string;
   code: string;
   onChange: (code: string) => void;
+  language: 'json' | 'yaml';
 };
 
-function Editor({ title, code, onChange }: EditorProps) {
+function Editor({ title, code, onChange, language }: EditorProps) {
   const [valid, setValid] = useState(true);
 
   const onCodeChange = useCallback(
@@ -26,14 +28,19 @@ function Editor({ title, code, onChange }: EditorProps) {
       }
 
       try {
-        const parsedCode = JSON.parse(code);
+        let parsedCode: string;
+        if (language === 'json') {
+          parsedCode = JSON.parse(code);
+        } else {
+          parsedCode = YAML.parse(code);
+        }
         setValid(true);
         onChange(parsedCode);
       } catch (err) {
         setValid(false);
       }
     },
-    [setValid, onChange]
+    [setValid, onChange, language]
   );
 
   const icon = valid ? 'ok' : 'remove';
@@ -46,7 +53,7 @@ function Editor({ title, code, onChange }: EditorProps) {
         {' ' + title}
       </div>
       <MonacoEditor
-        language='json'
+        language={language}
         value={code}
         theme='vs-light'
         onChange={onCodeChange}
@@ -58,6 +65,7 @@ function Editor({ title, code, onChange }: EditorProps) {
 }
 
 const toJson = (val: unknown) => JSON.stringify(val, null, 2);
+const toYaml = (val: unknown) => YAML.stringify(val, null, 2);
 
 type EditorsProps = {
   schema: RJSFSchema;
@@ -125,19 +133,24 @@ export default function Editors({
 
   return (
     <div className='col-sm-7'>
-      <Editor title='JSONSchema' code={toJson(schema)} onChange={onSchemaEdited} />
+      <Editor language='yaml' title='JSONSchema (YAML)' code={toYaml(schema)} onChange={onSchemaEdited} />
       <div className='row'>
         <div className='col-sm-6'>
-          <Editor title='UISchema' code={toJson(uiSchema)} onChange={onUISchemaEdited} />
+          <Editor language='yaml' title='UISchema (YAML)' code={toYaml(uiSchema)} onChange={onUISchemaEdited} />
         </div>
         <div className='col-sm-6'>
-          <Editor title='formData' code={toJson(formData)} onChange={onFormDataEdited} />
+          <Editor language='json' title='formData (JSON)' code={toJson(formData)} onChange={onFormDataEdited} />
         </div>
       </div>
       {extraErrors && (
         <div className='row'>
           <div className='col'>
-            <Editor title='extraErrors' code={toJson(extraErrors || {})} onChange={onExtraErrorsEdited} />
+            <Editor
+              language='json'
+              title='extraErrors'
+              code={toJson(extraErrors || {})}
+              onChange={onExtraErrorsEdited}
+            />
           </div>
         </div>
       )}

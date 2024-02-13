@@ -1,0 +1,18 @@
+name: 'Publish'
+description: 'Publish YAML Playground to GitHub Pages'
+author: 'Oliver Dudgeon'
+
+runs:
+  using: 'composite'
+  steps:
+  - name: install and build
+    shell: bash
+    run: |
+      cd packages/playground
+      npm i
+      npm run build
+  - name: Deploy
+    uses: peaceiris/actions-gh-pages@v3
+    with:
+      github_token: ${{ env.GITHUB_TOKEN }}
+      publish_dir: ./dist
