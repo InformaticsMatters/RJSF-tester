@@ -1,8 +1,6 @@
 name: 'Publish'
 on:
   workflow_dispatch:
-    types:
-      - allow-forks
 
 jobs:
   publish:
